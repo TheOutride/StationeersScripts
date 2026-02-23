@@ -1,0 +1,107 @@
+alias Centrifuge0 d0
+alias Centrifuge1 d1
+alias Centrifuge2 d2
+alias Centrifuge3 d3
+alias Centrifuge4 d4
+alias Centrifuge5 d5
+
+alias CentrifugeRefID r0
+alias InputItemQuantity r1
+alias InputPressure r2
+alias CurrentStress r3
+alias CurrentThrottle r4
+alias CurrentReagents r5
+
+define SiloHash 1155865682
+
+Start:
+sleep 3
+sb SiloHash On 1
+sb SiloHash Open 1
+l CentrifugeRefID Centrifuge0 ReferenceId
+jal CheckItemAndPressure
+jal CheckReagents
+
+bdns Centrifuge1 Start
+l CentrifugeRefID Centrifuge1 ReferenceId
+jal CheckItemAndPressure
+jal CheckReagents
+
+bdns Centrifuge2 Start
+l CentrifugeRefID Centrifuge2 ReferenceId
+jal CheckItemAndPressure
+jal CheckReagents
+
+bdns Centrifuge3 Start
+l CentrifugeRefID Centrifuge3 ReferenceId
+jal CheckItemAndPressure
+jal CheckReagents
+
+bdns Centrifuge4 Start
+l CentrifugeRefID Centrifuge4 ReferenceId
+jal CheckItemAndPressure
+jal CheckReagents
+
+bdns Centrifuge5 Start
+l CentrifugeRefID Centrifuge5 ReferenceId
+jal CheckItemAndPressure
+jal CheckReagents
+j Start
+
+CheckItemAndPressure:
+# CheckStress
+l CurrentStress CentrifugeRefID Stress
+beq CurrentStress 100 StopCentrifuge
+
+# Check for item in Input
+ls InputItemQuantity CentrifugeRefID 0 Quantity
+beqz InputItemQuantity StopCentrifuge
+
+# Check for Pressure in Input Pipe
+l InputPressure CentrifugeRefID PressureInput
+blt InputPressure 1000 StopCentrifuge
+l CurrentThrottle CentrifugeRefID Throttle
+beq CurrentThrottle 100 ra
+j ColdStartCentrifuge
+
+StopCentrifuge:
+s CentrifugeRefID On 0
+s CentrifugeRefID Throttle 0
+s CentrifugeRefID CombustionLimiter 0
+l CurrentReagents CentrifugeRefID Reagents
+bgt CurrentReagents 1 OpenCentrifuge
+j ra
+
+ColdStartCentrifuge:
+bgt CurrentStress 30 ra
+s CentrifugeRefID On 1
+
+# If throttle is at 10, go to phase 2, otherwise cold start
+l CurrentThrottle CentrifugeRefID Throttle
+beq CurrentThrottle 10 ColdStartPhase2
+s CentrifugeRefID CombustionLimiter 10
+s CentrifugeRefID Throttle 10
+j ra
+
+ColdStartPhase2:
+l CurrentStress CentrifugeRefID Stress
+bnez CurrentStress ra
+s CentrifugeRefID CombustionLimiter 100
+s CentrifugeRefID Throttle 100
+j ra
+
+CheckReagents:
+l CurrentReagents CentrifugeRefID Reagents
+blt CurrentReagents 3000 ra
+l CurrentStress CentrifugeRefID Stress
+bnez CurrentStress ra
+
+OpenCentrifuge:
+s CentrifugeRefID On 0
+s CentrifugeRefID Open 1
+yield
+s CentrifugeRefID Open 0
+sleep 3
+s CentrifugeRefID On 1
+j CheckReagents
+
