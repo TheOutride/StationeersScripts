@@ -1,6 +1,3 @@
-# StationeersScripts
-Stationeers IC10 Codes
-
 # Please Read!
 If you have any issues with the scripts, please check their sections below before posting an issue.
 
