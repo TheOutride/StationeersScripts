@@ -1,0 +1,128 @@
+alias HousingCFTO d0
+alias Engine d1   # Housing: 0 NotCFTO, 1 Drills below 20%, 2 Mining, 3 Survey
+alias Avionics d2 # Housing: 4 Discovery, 5 In Flight, 6 All Sites Discovered and mined.
+alias Dial d3     # If Housing 6 - Player delete locations OR change dial to re-mine
+alias BatteryRemaining r0
+alias RemainingBurnTime r1
+alias DialSetting r2
+alias RocketCode r3
+alias DestCode r4
+alias RocketCFTO r5
+alias DiscoveredSites r6
+alias SurveyProgress r7
+alias DrillsCondition r8
+alias AsteroidOreQuantity r9
+alias OreMinedQuantity r10
+alias StoredOre r11
+alias SecondsToDestination r12
+alias PreviousOreMined r13
+alias CurrentAsteroidCode r14
+CheckLocation: # Check where the rocket with Avionic's CurentCode
+s Engine On 0
+l RocketCode Avionics CurrentCode
+beq RocketCode 4014 RocketLaunch # Home Code
+beq RocketCode 214 DiscoverAsteroids # Space Vapor Cloud Code
+l SurveyProgress Avionics Survey
+bleal SurveyProgress 10 SurveyAsteroid
+sb 2014252591 On 0 # Rocket Scanners Hash
+GoMining:
+jal CheckRocketStatus
+jal CheckDial
+s Avionics Mode 2 # Mining Mode
+sb -2087223687 On 1 # Rocket Miner Hash
+s db Setting 2
+sleep 20
+move PreviousOreMined OreMinedQuantity
+l OreMinedQuantity Avionics MinedQuantity
+sub PreviousOreMined OreMinedQuantity PreviousOreMined
+div PreviousOreMined PreviousOreMined 3
+ble PreviousOreMined 18 GoToSparseVaporField 
+l AsteroidOreQuantity Avionics TotalQuantity
+bge OreMinedQuantity AsteroidOreQuantity GoToSparseVaporField
+j GoMining
+DrillsDamaged:
+s db Setting 1
+RocketLaunch:
+sleep 5
+lb DrillsCondition -2087223687 DrillCondition 0
+blt DrillsCondition 0.2 DrillsDamaged
+s db Setting 0
+l RocketCFTO HousingCFTO Setting
+beqz RocketCFTO RocketLaunch
+s Engine Throttle 100
+GoToSparseVaporField:
+move DestCode 214 # Sparse Vapor Field Code
+l DialSetting Dial Setting
+add DialSetting DialSetting 1
+s Dial Setting DialSetting
+FlightTime: # Loop until arrival then check location
+s Avionics DestinationCode DestCode
+yield
+s Engine On 1
+s db Setting 5
+l RocketCode Avionics CurrentCode
+bne RocketCode DestCode FlightTime
+j CheckLocation
+AwaitClearSites:
+yield
+jal CheckRocketStatus
+s db Setting 6
+l DiscoveredSites Avionics Sites
+beq DiscoveredSites 9 AwaitClearSites
+DiscoverAsteroids:
+yield
+s Avionics Mode 4
+sb 2014252591 On 1 # Rocket Scanner Hash
+s db Setting 4
+l DiscoveredSites Avionics Sites
+bne DiscoveredSites 9 DiscoverAsteroids
+SelectAsteroid:
+sb 2014252591 On 0 # Rocket Scanner Hash
+sb -2087223687 On 0 # Rocket Miner Hash
+beq CurrentAsteroidCode 29010114 AwaitClearSites
+jal CheckFuelAndRocketStatus
+l DialSetting Dial Setting
+sub DialSetting DialSetting 1
+mul CurrentAsteroidCode DialSetting 10000
+add CurrentAsteroidCode CurrentAsteroidCode 200214
+move DestCode CurrentAsteroidCode
+add DialSetting DialSetting 1
+j FlightTime
+SurveyAsteroid:
+yield
+jal CheckRocketStatus
+jal CheckDial
+s Avionics Mode 3
+sb 2014252591 On 1
+s db Setting 3
+l SurveyProgress Avionics Survey
+bge SurveyProgress 10 GoMining
+j SurveyAsteroid
+CheckDial:
+l DialSetting Dial Setting
+sub DialSetting DialSetting 1
+mul CurrentAsteroidCode DialSetting 10000
+add CurrentAsteroidCode CurrentAsteroidCode 200214
+l RocketCode Avionics CurrentCode
+beq CurrentAsteroidCode RocketCode ra
+j GoToSparseVaporField
+CheckFuelAndRocketStatus:
+s Avionics DestinationCode 4014
+s Engine On 1
+sleep 1
+s Engine On 0
+l SecondsToDestination Avionics TimeToDestination
+l RemainingBurnTime Avionics BurnTimeRemaining
+sub RemainingBurnTime RemainingBurnTime SecondsToDestination
+ble RemainingBurnTime 150 ReturnHome
+CheckRocketStatus:
+lb BatteryRemaining -1125305264 Ratio 0 # Battery Hash
+ble BatteryRemaining 0.2 ReturnHome 
+lb StoredOre 1151864003 Quantity 0 #Check Medium Cargo ore quantity
+bgt StoredOre 99 ReturnHome
+lb DrillsCondition -2087223687 DrillCondition 0
+bnez DrillsCondition ra
+ReturnHome:
+move DestCode 4014 # Code for home
+move CurrentAsteroidCode 0
+j FlightTime
