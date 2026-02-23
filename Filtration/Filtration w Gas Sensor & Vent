@@ -1,0 +1,36 @@
+alias Filter db
+alias Sensor d0
+alias Vent d1
+
+alias OutputPressure r0
+alias OutsideTemp r1
+alias VentStatus r1
+alias FilterStatus r2
+
+s Vent Mode 1
+
+Start:
+yield
+l OutputPressure Filter PressureOutput
+bgt OutputPressure 45000 StopAll
+l FilterStatus Filter Mode
+beq FilterStatus 1 CheckTemp
+s Filter Mode 1
+j CheckTemp
+
+CheckTemp:
+l OutsideTemp Sensor Temperature
+bgt OutsideTemp 413.5 StopVent
+l VentStatus Vent On
+beq VentStatus 1 Start
+s Vent On 1
+j Start
+
+StopAll:
+s Filter Mode 0
+s Vent On 0
+j Start
+
+StopVent:
+s Vent On 0
+j Start
