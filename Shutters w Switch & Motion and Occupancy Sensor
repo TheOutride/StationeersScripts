@@ -1,0 +1,28 @@
+alias PlayerDetect r0
+alias MotionDetect r1
+alias ShutterState r2
+alias CheckPandS r3
+alias Switch d0
+alias OcSensor d1
+alias Shutters d2
+alias MotionSensor d3
+
+Start:
+yield
+l PlayerDetect OcSensor Activate
+beq PlayerDetect 0 CloseShutters
+l MotionDetect MotionSensor Activate
+beq MotionDetect 1 ShuttersOn
+s Shutters On 0
+j Start
+
+CloseShutters:
+l ShutterState Shutters Open
+beq ShutterState 0 Start
+s Shutters On 1
+s Shutters Open 0
+j Start
+
+ShuttersOn:
+s Shutters On 1
+j Start
