@@ -1,0 +1,37 @@
+alias GasSensor d0
+alias PipeAnalyzer d1
+alias Vent d2
+alias DigitalValve d3
+alias ExternalTemp r0
+alias TankPressure r1
+alias VentHash r2
+
+l VentHash Vent PrefabHash
+sb VentHash PressureInternal 45000
+
+CheckTemp:
+yield
+sb VentHash On 0
+l ExternalTemp GasSensor Temperature
+blt ExternalTemp 423.15 VentOut
+j CheckTemp
+
+VentOut:
+yield
+l TankPressure PipeAnalyzer Pressure
+blt TankPressure 100 VentIn
+sb VentHash Mode 0
+sb VentHash On 1
+bdns DigitalValve VentOut
+s DigitalValve On 1
+j VentOut
+
+VentIn:
+yield
+l ExternalTemp GasSensor Temperature
+bgt ExternalTemp 423.15 CheckTemp
+sb VentHash Mode 1
+sb VentHash On 1
+bdns DigitalValve VentIn
+s DigitalValve On 1
+j VentIn
