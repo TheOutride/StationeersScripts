@@ -13,6 +13,7 @@ Rockets will require at least 2 IC10 Chips and a housing for each.
   1. (Rocket Umbilical Control) First IC10 script is the umbilicals. Pins: d0 is power, d1 is gas, d2 is chutes, d3 is the rocket's Battery, d4 is a gas analyzer, d5 is the rocket's cargo storage).
      
   2. (Vulcan Rocket Control, either Metallic Field for Iron, Copper, Gold, & Silicon OR Space Vapors for Water & Oxygen). Second IC10 Script controls the rocket directly. Pins: d0 IC10 Housing the Rocket Umbilical Control script, d1 Rocket Engine, d2 Rocket Avionics, d3 Logic Dial. Set the dial to Max 10, and use 1-10 for the 9 "asteorids" inside of the Metallic Asteroid Field or the Space Vapors. You can manually change the dial at any time to change the rocket's destination but it will only change if it's surveying or mining an asteroid already.
+  - Important: SET AUTO-SHUT OFF, OFF. This will turn off the Gas Analyzers for the Turbo Pump and can lead to the fuel line bursting.
   - Important: If the rocket travels to the 9th asteroid (Metallic Asteroid Code 29010114) the script will auto stop and wait for player input. Either A: Change the dial to another number, or B: Delete Asteroids. The script will contine to run. While in this state, the rocket will continously check it's batteries. If batteris are <20% it will automatically return home.
   - Note: You can actively delete asteroids and the rocket will automatically discover as it goes from asteroid to the Metallic Asteroid Field/Space Vapors before going to the next asteroid.
   
