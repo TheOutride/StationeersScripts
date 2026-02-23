@@ -22,7 +22,6 @@ s Engine On 0
 l RocketCode Avionics CurrentCode
 beq RocketCode 4014 RocketLaunch # Home Code
 beq RocketCode 10114 DiscoverAsteroids # Space Vapor Cloud Code
-beq RocketCode 114 GoToMetallicAsteroidField # Planet Archon Code
 l SurveyProgress Avionics Survey
 bleal SurveyProgress 10 SurveyAsteroid
 GoMining:
@@ -36,13 +35,14 @@ move PreviousOreMined OreMinedQuantity
 l OreMinedQuantity Avionics MinedQuantity
 sub PreviousOreMined OreMinedQuantity PreviousOreMined
 div PreviousOreMined PreviousOreMined 3
-ble PreviousOreMined 18 GoToMetallicAsteroidField 
+ble PreviousOreMined 3 GoToMetallicAsteroidField 
 l AsteroidOreQuantity Avionics TotalQuantity
 bge OreMinedQuantity AsteroidOreQuantity GoToMetallicAsteroidField
 j GoMining
 DrillsDamaged:
 s db Setting 1
 RocketLaunch:
+s Engine On 0
 sleep 5
 lb DrillsCondition -2087223687 DrillCondition 0
 blt DrillsCondition 0.2 DrillsDamaged
@@ -70,7 +70,6 @@ s db Setting 6
 l DiscoveredSites Avionics Sites
 beq DiscoveredSites 9 AwaitClearSites
 DiscoverAsteroids:
-yield
 s Avionics Mode 4
 sb 2014252591 On 1 # Rocket Scanner Hash
 s db Setting 4
@@ -117,7 +116,7 @@ sub RemainingBurnTime RemainingBurnTime SecondsToDestination
 ble RemainingBurnTime 100 ReturnHome
 CheckRocketStatus:
 lb BatteryRemaining -1125305264 Ratio 0 # Battery Hash
-ble BatteryRemaining 0.2 ReturnHome 
+ble BatteryRemaining 0.15 ReturnHome 
 lb StoredOre 1151864003 Quantity 0 #Check Medium Cargo ore quantity
 bgt StoredOre 99 ReturnHome
 lb DrillsCondition -2087223687 DrillCondition 0
@@ -125,4 +124,5 @@ bnez DrillsCondition ra
 ReturnHome:
 move DestCode 4014 # Code for home
 move CurrentAsteroidCode 0
+s Dial Setting 0
 j FlightTime
