@@ -1,0 +1,65 @@
+alias TurboPump d0
+alias FuelOutputAnal d1
+alias FuelStorageAnal d2
+
+# n = (P * V) / (R * T) 'Moles Per Tick'
+# V = (N * R * T) / P
+define GasConstant 8.3144 # R
+alias InputPressure r0 # P
+alias TurboPumpVolume r1 # V
+alias MolesPerTick r2 # n
+alias InputTemp r3 # T
+
+alias OutputPressure r4
+alias OutputVolume r5
+alias OutputTemp r6
+alias OutputMissingPress r7
+alias PressTimesVolume r8
+alias GasConstTimesTemp r9
+
+Start:
+yield
+# Turbo Pump green arrow should face engine pipes when placed
+# otherwise change line 23 to Mode 0 and Line 63 to Mode 1
+s TurboPump Mode 0 
+s FuelOutputAnal On 1
+s FuelStorageAnal On 1
+l OutputPressure FuelOutputAnal Pressure
+sub OutputMissingPress 59500 OutputPressure # Calc Pressure Missing
+bleal OutputMissingPress 0 PullFromOutputPipes # Prevents overpressuring pipes
+l InputPressure FuelStorageAnal Pressure
+beqz InputPressure SetPumpZeroVolume # If you run out of fuel, why waste power :)
+
+
+# First Equation to calculate missing Moles
+l InputTemp FuelStorageAnal Temperature
+l OutputVolume FuelOutputAnal Volume
+l OutputTemp FuelOutputAnal Temperature
+mul PressTimesVolume OutputMissingPress OutputVolume # (P * V)
+mul GasConstTimesTemp GasConstant OutputTemp # (R * T)
+div MolesPerTick PressTimesVolume GasConstTimesTemp # PV/RT
+
+# Second Equation to Calculate Pump Volume Needed
+mul TurboPumpVolume MolesPerTick GasConstant # (N * R)
+mul TurboPumpVolume TurboPumpVolume InputTemp # (NR * T)
+div TurboPumpVolume TurboPumpVolume InputPressure # (NRT / P) 
+beq TurboPumpVolume 0 SetPumpZeroVolume 
+bgt TurboPumpVolume 100 SetPumpMaxVolume
+s TurboPump Setting TurboPumpVolume
+s TurboPump On 1
+j Start
+
+SetPumpZeroVolume:
+s TurboPump Setting 0
+s TurboPump On 0
+j Start
+
+SetPumpMaxVolume:
+s TurboPump Setting 100
+s TurboPump On 1
+j Start
+
+PullFromOutputPipes:
+mul OutputMissingPress OutputMissingPress -1
+s TurboPump Mode 1
+j ra
