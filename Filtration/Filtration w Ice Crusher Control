@@ -1,0 +1,34 @@
+alias Filter db
+
+alias InputPressure r1
+alias Filter1Damage r2
+alias Filter2Damage r3
+alias FiltersDamage r4
+
+define IceCrusherHash 443849486
+
+Start:
+yield
+s Filter Mode 1
+ls Filter1Damage Filter 0 Quantity
+ls Filter2Damage Filter 1 Quantity
+add FiltersDamage Filter1Damage Filter2Damage
+div FiltersDamage FiltersDamage 2
+ble FiltersDamage 1 FiltersDamaged
+l InputPressure Filter PressureInput
+bgt InputPressure 45000 StopCrushers
+ble InputPressure 40000 StartIceCrushers
+j Start
+
+FiltersDamaged:
+s Filter On 0
+sb IceCrusherHash On 0
+j Start
+
+StopCrushers:
+sb IceCrusherHash On 0
+j Start
+
+StartIceCrushers:
+sb IceCrusherHash On 1
+j Start
