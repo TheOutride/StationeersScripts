@@ -24,7 +24,6 @@ beq RocketCode 4014 RocketLaunch # Home Code
 beq RocketCode 214 DiscoverAsteroids # Space Vapor Cloud Code
 l SurveyProgress Avionics Survey
 bleal SurveyProgress 10 SurveyAsteroid
-sb 2014252591 On 0 # Rocket Scanners Hash
 GoMining:
 jal CheckRocketStatus
 jal CheckDial
@@ -43,6 +42,7 @@ j GoMining
 DrillsDamaged:
 s db Setting 1
 RocketLaunch:
+s Engine On 0
 sleep 5
 lb DrillsCondition -2087223687 DrillCondition 0
 blt DrillsCondition 0.2 DrillsDamaged
@@ -117,7 +117,7 @@ sub RemainingBurnTime RemainingBurnTime SecondsToDestination
 ble RemainingBurnTime 150 ReturnHome
 CheckRocketStatus:
 lb BatteryRemaining -1125305264 Ratio 0 # Battery Hash
-ble BatteryRemaining 0.2 ReturnHome 
+ble BatteryRemaining 0.15 ReturnHome 
 lb StoredOre 1151864003 Quantity 0 #Check Medium Cargo ore quantity
 bgt StoredOre 99 ReturnHome
 lb DrillsCondition -2087223687 DrillCondition 0
