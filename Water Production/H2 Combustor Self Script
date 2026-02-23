@@ -1,0 +1,26 @@
+alias Combustor db
+alias CoolantAnalyzer d0
+alias InsulatedAnalyzer d1
+
+alias CoolantPressure r0
+alias InsulatedPressure r1
+alias CombinedPressure r2
+alias COmbustorStatus r3
+alias CombustorStatus r4
+
+Start:
+yield
+l CoolantPressure CoolantAnalyzer Pressure
+l InsulatedPressure InsulatedAnalyzer Pressure
+add CombinedPressure CoolantPressure InsulatedPressure
+bgt CombinedPressure 40000 StopCombustor
+l CombustorStatus Combustor Mode
+beq CombustorStatus 1 Start
+s Combustor Mode 1
+j Start
+
+StopCombustor:
+l CombustorStatus Combustor Mode
+beq CombustorStatus 0 Start
+s Combustor Mode 0
+j Start
