@@ -69,12 +69,14 @@ s CentrifugeRefID On 0
 s CentrifugeRefID Throttle 0
 s CentrifugeRefID CombustionLimiter 0
 l CurrentReagents CentrifugeRefID Reagents
-bgt CurrentReagents 1 OpenCentrifuge
+blt CurrentReagents 1 ColdStartCentrifuge
+s CentrifugeRefID Open 1
 j ra
 
 ColdStartCentrifuge:
 bgt CurrentStress 30 ra
 s CentrifugeRefID On 1
+s CentrifugeRefID Open 0
 
 # If throttle is at 10, go to phase 2, otherwise cold start
 l CurrentThrottle CentrifugeRefID Throttle
@@ -104,4 +106,3 @@ s CentrifugeRefID Open 0
 sleep 3
 s CentrifugeRefID On 1
 j CheckReagents
-
