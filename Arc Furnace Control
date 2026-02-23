@@ -1,0 +1,50 @@
+alias ArcFurnace0 d0
+alias ArcFurnace1 d1
+alias ArcFurnace2 d2
+alias ArcFurnace3 d3
+alias ArcFurnace4 d4
+alias ArcFurnace5 d5
+
+alias ArcFurnaceRefID r0
+alias InputItemQuantity r1
+alias ArcFurnaceStatus r2
+
+Start:
+sleep 2
+l ArcFurnaceRefID ArcFurnace0 ReferenceId
+jal CheckItemInput
+
+bdns ArcFurnace1 Start
+l ArcFurnaceRefID ArcFurnace1 ReferenceId
+jal CheckItemInput
+
+bdns ArcFurnace2 Start
+l ArcFurnaceRefID ArcFurnace2 ReferenceId
+jal CheckItemInput
+
+bdns ArcFurnace3 Start
+l ArcFurnaceRefID ArcFurnace3 ReferenceId
+jal CheckItemInput
+
+bdns ArcFurnace4 Start
+l ArcFurnaceRefID ArcFurnace4 ReferenceId
+jal CheckItemInput
+
+bdns ArcFurnace5 Start
+l ArcFurnaceRefID ArcFurnace5 ReferenceId
+jal CheckItemInput
+
+j Start
+
+CheckItemInput:
+ls InputItemQuantity ArcFurnaceRefID 0 Quantity
+bgtz InputItemQuantity TurnOnArcFurnace
+s ArcFurnaceRefID On 0
+j ra
+
+TurnOnArcFurnace:
+s ArcFurnaceRefID On 1
+l ArcFurnaceStatus ArcFurnaceRefID Activate
+beq ArcFurnaceStatus 1 ra
+s ArcFurnaceRefID Activate 1
+j ra
