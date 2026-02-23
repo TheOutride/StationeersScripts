@@ -1,0 +1,33 @@
+alias DaylightSensor d0
+alias GrowLight d1
+alias WaterAnalyzer d2
+alias WaterDigitalValve d3
+
+alias WaterTemp r0
+alias GrowLightHash r1
+alias SunAngle r2
+
+l GrowLightHash GrowLight PrefabHash 
+
+CheckSolarAngle:
+yield
+l SunAngle DaylightSensor SolarAngle
+bgt SunAngle 94.5 TurnOnGrowLights
+sb GrowLightHash On 0
+j CheckWaterTemp
+
+TurnOnGrowLights:
+sb GrowLightHash On 1
+
+CheckWaterTemp:
+bdns WaterAnalyzer CheckSolarAngle
+bdns WaterDigitalValve CheckSolarAngle
+l WaterTemp WaterAnalyzer Temperature
+bge WaterTemp 293.15 OpenValve
+s WaterDigitalValve On 0
+j CheckSolarAngle
+
+OpenValve:
+bge WaterTemp 303.15 CheckSolarAngle
+s WaterDigitalValve On 1
+j CheckSolarAngle 
