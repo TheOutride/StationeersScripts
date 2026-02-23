@@ -1,0 +1,63 @@
+alias UmbilicalPower d0
+alias UmbilicalGas d1
+alias UmbilicalChute d2
+alias RocketBatteries d3
+alias RocketGasStorage d4
+alias RocketCargoStorage d5
+
+alias UmbilicalPowerStatus r1
+alias UmbilicalGasStatus r2
+alias UmbilicalChuteStatus r3
+alias RocketBatteryRatio r4
+alias RocketGasFillRatio r5
+alias RocketCargoQuantity r6
+alias RocketCFTO r7 # "Clear For Take Off"
+alias BatteryHash r8
+
+l BatteryHash RocketBatteries PrefabHash
+
+Start:
+yield
+s UmbilicalPower On 1
+s UmbilicalGas On 1
+s UmbilicalChute On 1
+move RocketCFTO 1
+# Check Battery %
+lb RocketBatteryRatio BatteryHash Ratio 0
+bltal RocketBatteryRatio 0.95 SetNotCFTO
+
+# Check if Pressure at 59.5MPa
+l RocketGasFillRatio RocketGasStorage Pressure 
+div RocketGasFillRatio RocketGasFillRatio 59500
+bltal RocketGasFillRatio 0.999 SetNotCFTO
+bgtal RocketGasFillRatio 1.004 SetNotCFTO
+
+# Check if Cargo has ores
+l RocketCargoQuantity RocketCargoStorage Quantity 
+bneal RocketCargoQuantity 0 SetNotCFTO
+
+
+# If not CFTO, extend umbilicals otherwise retract.
+beqz RocketCFTO ExtendUmbilicals
+s db Setting 1 # Set IC Housing to 1 for Rocket Control Housing to know it's CFTO
+s UmbilicalPower Open 0
+s UmbilicalGas Open 0
+s UmbilicalChute Open 0
+s RocketCargoStorage On 0
+s RocketCargoStorage Open 0
+sleep 1
+j Start
+
+SetNotCFTO:
+move RocketCFTO 0
+s db Setting 0 # Set IC Housing to 0 for Rocket Control Housing to know it's NOT CFTO
+j ra
+
+ExtendUmbilicals:
+s UmbilicalPower Open 1
+s UmbilicalGas Open 1
+s UmbilicalChute Open 1
+s RocketCargoStorage On 1
+s RocketCargoStorage Open 1
+sleep 1
+j Start
