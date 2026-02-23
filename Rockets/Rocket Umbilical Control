@@ -24,12 +24,12 @@ s UmbilicalChute On 1
 move RocketCFTO 1
 # Check Battery %
 lb RocketBatteryRatio BatteryHash Ratio 0
-bltal RocketBatteryRatio 0.95 SetNotCFTO
+bltal RocketBatteryRatio 1 SetNotCFTO
 
 # Check if Pressure at 59.5MPa
 l RocketGasFillRatio RocketGasStorage Pressure 
 div RocketGasFillRatio RocketGasFillRatio 59500
-bltal RocketGasFillRatio 0.999 SetNotCFTO
+bltal RocketGasFillRatio 0.9999 SetNotCFTO
 bgtal RocketGasFillRatio 1.004 SetNotCFTO
 
 # Check if Cargo has ores
