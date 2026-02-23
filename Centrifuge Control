@@ -20,6 +20,7 @@ sb SiloHash On 1
 sb SiloHash Open 1
 l CentrifugeRefID Centrifuge0 ReferenceId
 jal CheckItemAndPressure
+
 jal CheckReagents
 
 bdns Centrifuge1 Start
@@ -56,7 +57,6 @@ beq CurrentStress 100 StopCentrifuge
 # Check for item in Input
 ls InputItemQuantity CentrifugeRefID 0 Quantity
 beqz InputItemQuantity StopCentrifuge
-
 # Check for Pressure in Input Pipe
 l InputPressure CentrifugeRefID PressureInput
 blt InputPressure 1000 StopCentrifuge
@@ -69,7 +69,6 @@ s CentrifugeRefID On 0
 s CentrifugeRefID Throttle 0
 s CentrifugeRefID CombustionLimiter 0
 l CurrentReagents CentrifugeRefID Reagents
-blt CurrentReagents 1 ColdStartCentrifuge
 s CentrifugeRefID Open 1
 j ra
 
