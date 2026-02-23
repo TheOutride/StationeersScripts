@@ -1,0 +1,25 @@
+alias Filter db
+
+alias OutputPressure r0
+alias OxygenRatio r1
+alias FilterStatus r2
+
+Start:
+yield
+l OutputPressure Filter PressureOutput
+bgt OutputPressure 45000 FilterIdle
+l OxygenRatio Filter RatioOxygenInput
+bgt OxygenRatio 0.25 FilterActive
+j FilterIdle
+
+FilterIdle:
+l FilterStatus Filter Mode
+beq FilterStatus 0 Start
+s Filter Mode 0
+j Start
+
+FilterActive:
+l FilterStatus Filter Mode
+beq FilterStatus 1 Start
+s Filter Mode 1
+j Start
