@@ -1,0 +1,70 @@
+alias Condenser d0
+alias TurboPump d1
+alias CoolantAnalyzer d2
+alias InsulatedAnalyzer d3
+alias GasSensor d4
+alias LiquidAnalyzer d5
+
+alias MaxPipeVolume r0
+alias CurrentPipeVolume r1
+alias PipeVolumeRatio r2
+alias CondenserStatus r3
+alias OutsideTemp r4
+alias WaterCoolantTemp r5
+alias WaterInsulatedTemp r6
+alias TurboPumpStatus r7
+alias WaterCoolantPressure r8
+alias WaterInsulatedPressure r9
+alias WaterCombinedPressure r10
+
+CheckPipes:
+yield
+l WaterCoolantPressure CoolantAnalyzer Pressure
+l WaterInsulatedPressure InsulatedAnalyzer Pressure
+add WaterCombinedPressure WaterCoolantPressure WaterInsulatedPressure
+beq WaterCombinedPressure 0 TurnOffTurboPump
+j CheckWaterCoolantTemp
+
+TurnOffTurboPump:
+s TurboPump On 0
+j ra
+
+CheckWaterCoolantTemp:
+l WaterCoolantTemp CoolantAnalyzer Temperature
+bltal WaterCoolantTemp 674 StopCooling
+l OutsideTemp GasSensor Temperature
+l WaterInsulatedTemp InsulatedAnalyzer Temperature 
+bgt OutsideTemp 623.15 StopCooling
+l WaterInsulatedPressure InsulatedAnalyzer Pressure
+beq WaterInsulatedPressure 0 TurnOffTurboPump
+s TurboPump Mode 0
+s TurboPump On 1
+j CheckLiquidVolume
+
+StopCooling:
+l WaterCoolantPressure CoolantAnalyzer  Pressure
+beq WaterCoolantPressure 0 TurnOffTurboPump
+s TurboPump Mode 1
+s TurboPump On 1
+j CheckWaterCoolantTemp
+
+CheckLiquidVolume:
+l MaxPipeVolume LiquidAnalyzer Volume
+l CurrentPipeVolume LiquidAnalyzer VolumeOfLiquid 
+div PipeVolumeRatio CurrentPipeVolume MaxPipeVolume
+l CondenserStatus Condenser On
+bgt PipeVolumeRatio 0.50 StopCondenser
+j StartCondenser
+
+StartCondenser:
+l WaterInsulatedTemp InsulatedAnalyzer Temperature
+bgt WaterInsulatedTemp 688 StopCondenser
+beq WaterInsulatedPressure 0 StopCondenser
+beq CondenserStatus 1 CheckPipes
+s Condenser On 1
+j CheckPipes
+
+StopCondenser:
+beq CondenserStatus 0 CheckPipes
+s Condenser On 0
+j CheckPipes
