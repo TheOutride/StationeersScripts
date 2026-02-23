@@ -1,0 +1,39 @@
+alias Mixer d0
+alias OxygenAnalyzer d1
+alias VolAnalyzer d2
+alias FuelAnalyzer d3
+
+alias OxygenTemp r0
+alias VolTemp r1
+alias AdjustedTemp r2
+alias FuelPressure r3
+alias MixerStatus r4
+alias OxygenPressure r5
+alias VolPressure r6
+
+Start:
+yield
+l FuelPressure FuelAnalyzer Pressure
+bgt FuelPressure 40000 StopMixer
+l OxygenTemp OxygenAnalyzer Temperature
+l VolTemp VolAnalyzer Temperature
+sub AdjustedTemp VolTemp OxygenTemp 
+blt AdjustedTemp 1 StartMixer
+j Start
+
+StartMixer:
+blt AdjustedTemp -1 StopMixer
+l OxygenPressure OxygenAnalyzer Pressure
+blt OxygenPressure 500 StopMixer
+l VolPressure VolAnalyzer Pressure
+blt VolPressure 10000 StopMixer
+l MixerStatus Mixer On
+beq MixerStatus 1 Start
+s Mixer On 1
+j Start
+
+StopMixer:
+l MixerStatus Mixer On
+beq MixerStatus 0 Start
+s Mixer On 0
+j Start
